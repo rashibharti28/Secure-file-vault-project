@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f5f7fa;
+        }
+
+        .file-name {
+            font-weight: 500;
+        }
+
+        .card {
+            border-radius: 12px;
+        }
+
+        .list-group-item {
+            border-radius: 10px !important;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-dark bg-dark px-4">
+    <span class="navbar-brand">🔐 Secure Vault</span>
+    <div>
+        <span class="text-white me-3">👋 {{ username }}</span>
+        <a href="/logout" class="btn btn-danger btn-sm">Logout</a>
+    </div>
+</nav>
+
+<div class="container mt-4">
+
+    <!--  UPLOAD -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <h5>📤 Upload File</h5>
+            <form action="/upload" method="POST" enctype="multipart/form-data">
+                <input type="file" name="file" class="form-control" required>
+                <button class="btn btn-primary mt-2">Upload</button>
+            </form>
+        </div>
+    </div>
+    
+    <!--  UPLOAD FROM URL -->
+    <div class="card shadow mb-4">
+      <div class="card-body">
+         <h5>🌐 Upload from URL</h5>
+
+         <form action="/upload_url" method="POST">
+            <input type="text"
+                   name="file_url"
+                   class="form-control"
+                   placeholder="Enter file URL (https://...)"
+                   required>
+
+            <button class="btn btn-info mt-2">Upload</button>
+         </form>
+       </div>
+    </div>
+
+    <!--  CREATE NOTE -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <h5>✍ Create Note</h5>
+            <form action="/create" method="POST">
+                <input type="text" name="filename" class="form-control"
+                       placeholder="Enter filename (notes.txt)" required>
+                <button class="btn btn-success mt-2">Create</button>
+            </form>
+        </div>
+    </div>
+    
+    <!--  DIARY -->
+   <div class="card shadow mb-4">
+       <div class="card-body">
+         <h5>📔 Personal Diary</h5>
+         <p class="text-muted">Write your daily thoughts</p>
+         <a href="/diary" class="btn btn-warning">Open Diary</a>
+       </div>
+   </div>
+    <!--  FILE LIST -->
+    <h4 class="mb-3">📂 Your Files</h4>
+
+    <ul class="list-group">
+
+    {% for file in files %}
+    <li class="list-group-item d-flex justify-content-between align-items-center shadow-sm">
+
+        <!-- FILE ICON + NAME -->
+        <div class="file-name">
+
+            {% if file.type == 'pdf' %}
+                📕
+            {% elif file.type in ['png', 'jpg', 'jpeg'] %}
+                🖼
+            {% elif file.type == 'txt' %}
+                📄
+            {% else %}
+                📁
+            {% endif %}
+
+            {{ file.name }}
+            <br>
+            <small class="text-muted">📅 {{ file.date }}</small>
+        </div>
+
+        <!-- ACTION DROPDOWN -->
+        <div class="dropdown">
+            <button class="btn btn-outline-primary btn-sm dropdown-toggle"
+                    data-bs-toggle="dropdown">
+                Actions
+            </button>
+
+            <ul class="dropdown-menu dropdown-menu-end">
+
+                <!-- OPEN -->
+                <li>
+                    <a class="dropdown-item" href="/download/{{ file.name | urlencode }}">
+                        🔓 Open
+                    </a>
+                </li>
+
+                <!-- EDIT ONLY TEXT -->
+                {% if file.type == 'txt' %}
+                <li>
+                    <a class="dropdown-item" href="/edit/{{ file.name | urlencode }}">
+                        ✏️ Edit
+                    </a>
+                </li>
+                {% endif %}
+
+                <li><hr class="dropdown-divider"></li>
+
+                <!-- DELETE -->
+                <li>
+                    <form action="/delete/{{ file.name | urlencode }}" method="POST"
+                          onsubmit="return confirm('Are you sure you want to delete this file?');">
+                        <button class="dropdown-item text-danger">
+                            🗑 Delete
+                        </button>
+                    </form>
+                </li>
+
+            </ul>
+        </div>
+
+    </li>
+
+    {% else %}
+    <li class="list-group-item text-center text-muted">
+        No files uploaded yet
+    </li>
+    {% endfor %}
+
+    </ul>
+
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
